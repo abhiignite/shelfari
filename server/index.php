@@ -35,6 +35,7 @@ function getBooks() {
 }
 
 function getBook($id) {
+	$id = clean($id);
 	$query = "SELECT * FROM books WHERE id=:id";
 	try {
 		$db = getConnection();
@@ -55,15 +56,19 @@ function addBook() {
 	$book = json_decode($request->getBody());
 	$query = "INSERT INTO books (name, author, status) VALUES (:name, :author, :status)";
 	try {
+		$name = clean($book->name);
+		$author = clean($book->author);
+		$status = clean($book->status);
 		$db = getConnection();
 		$sql = $db->prepare($query);  
-		$sql->bindParam("name", $book->name);
-		$sql->bindParam("author", $book->author);
-		$sql->bindParam("status", $book->status);
+		$sql->bindParam("name", $name);
+		$sql->bindParam("author", $author);
+		$sql->bindParam("status", $status);
 		$sql->execute();
 		$book->id = $db->lastInsertId();
+		$id = $db->lastInsertId();
 		$db = null;
-		echo json_encode($book); 
+		 
 	} catch(PDOException $e) {
 		echo '{"error":{"text":'. $e->getMessage() .'}}'; 
 	}
@@ -71,16 +76,21 @@ function addBook() {
 
 
 function updateBook($id) {
+	
+	$id = clean($id);
 	$request = Slim::getInstance()->request();
 	$body = $request->getBody();
 	$book = json_decode($body);
 	$query = "UPDATE books set name=:name, author=:author, status=:status WHERE id=:id";
+		$name = clean($book->name);
+		$author = clean($book->author);
+		$status = clean($book->status);
 	try {
 		$db = getConnection();
 		$sql = $db->prepare($query);  
-		$sql->bindParam("name", $book->name);
-		$sql->bindParam("author", $book->author);
-		$sql->bindParam("status", $book->status);
+		$sql->bindParam("name", $name);
+		$sql->bindParam("author", $author);
+		$sql->bindParam("status", $status);
 		$sql->bindParam("id", $id);
 		$sql->execute();
 		$db = null;
@@ -92,6 +102,7 @@ function updateBook($id) {
 
 
 function deleteBook($id) {
+	$id = clean($id);
 	$query = "DELETE FROM books WHERE id=:id";
 	try {
 		$db = getConnection();
@@ -105,6 +116,7 @@ function deleteBook($id) {
 }
 
 function findByName($query) {
+	$query = clean($query);
 	$sql = "SELECT * FROM books WHERE UPPER(name) LIKE :query order by name";
 	try {
 		$db = getConnection();
@@ -120,5 +132,14 @@ function findByName($query) {
 	}
 }
 
+
+function clean($str)
+{
+	$str = trim($str);
+	$str = strip_tags($str);
+//	$str = mysql_real_escape_string($str);  Heroku giving error cause of this 
+	return $str;
+	
+}
 
 ?>

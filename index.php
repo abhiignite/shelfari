@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Shefali</title>
+  <title>Shelfari</title>
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -68,7 +68,7 @@
 </script>
 
 
-<script type="text/template" id="edit-user-template">
+<script type="text/template" id="edit-book-template">
     <form class="edit-book-form">
 		<legend><%= book ? 'Edit' : 'New' %> Book</legend>
         <label>Name</label>
@@ -130,6 +130,9 @@ $.fn.serializeObject = function() {
 	/* Views */
 	
 	var BooksList = Backbone.View.extend({
+		getTitle: function () {
+        return "Shelfari home";
+    },
 		el: '.page' ,
 		render: function () {
 			var that =this;
@@ -146,6 +149,12 @@ $.fn.serializeObject = function() {
 	
 	
 	var SearchList = Backbone.View.extend({
+		getTitle: function (options) {
+			if(options.name)
+				return "Books Search"; //Can add pattern to be searched here.
+			else
+				return "Search book";
+		},
 		el: '.page',
 		events: {
 			'submit #search' : 'searchUser'
@@ -184,6 +193,12 @@ $.fn.serializeObject = function() {
 	
 	
 	var EditBook = Backbone.View.extend({
+		getTitle: function (options) {
+			if(options.id)
+				return "Edit Book "+options.id;
+			else
+				return "Add book";
+		},
 		el: '.page' ,
 		render: function(options) {
 			var that = this;
@@ -192,14 +207,14 @@ $.fn.serializeObject = function() {
 				that.book.fetch({
 					success: function(book) {
 						console.log(JSON.stringify(book));
-						var template = _.template($('#edit-user-template').html(), {book:book});
+						var template = _.template($('#edit-book-template').html(), {book:book});
 						console.log('editing');
 						that.$el.html(template);
 					}
 				});
 			}
 			else {
-				var template = _.template($('#edit-user-template').html(), {book:null });
+				var template = _.template($('#edit-book-template').html(), {book:null });
 				console.log('editing');
 				this.$el.html(template);
 				}
@@ -215,7 +230,7 @@ $.fn.serializeObject = function() {
 			var book = new Book();
 			book.save(bookDetails , {
 			success: function(book) {
-				router.navigate('', {trigger:true});
+				window.history.back();
 				}
 			});	
 			return false;
@@ -255,17 +270,20 @@ $.fn.serializeObject = function() {
 	
 	router.on('route:home', function(){
 		bookslist.render();
-		console.log('We have loaded the page ');
+		$(document).attr('title', bookslist.getTitle);
+		console.log('Page Loaded');
 	});
 		
 	router.on('route:editBook', function(id){
 		editBook.render({id:id});
 		console.log('called edit');
+		$(document).attr('title', editBook.getTitle({id:id}));
 	});
 		
 	router.on('route:findbyName' , function(name) {
 		console.log('Query ---> '+name);
 		searchList.render({name:name});
+		$(document).attr('title', searchList.getTitle({name:name}));
 	});
 		
 	Backbone.history.start();
