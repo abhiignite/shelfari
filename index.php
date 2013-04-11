@@ -239,7 +239,7 @@ $.fn.serializeObject = function() {
 		deleteBook: function(evt) {
 			this.book.destroy({
 				success: function() {
-					router.navigate('', {trigger:true});
+					window.history.back();
 				}
 			})
 				return false;
