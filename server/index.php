@@ -136,8 +136,7 @@ function findByName($query) {
 function clean($str)
 {
 	$str = trim($str);
-	$str = strip_tags($str);
-//	$str = mysql_real_escape_string($str);  Heroku giving error cause of this 
+	$str = htmlentities($str);
 	return $str;
 	
 }
